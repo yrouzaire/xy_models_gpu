@@ -1,7 +1,7 @@
 # © Ylann Rouzaire 2025 `rouzaire.ylann@gmail.com`
 
 include("src/load_everything.jl")
-# hello
+
 
 ## ------------------ Parameters and data generation ------------------ ##
 ## ------------------ Parameters and data generation ------------------ ##
