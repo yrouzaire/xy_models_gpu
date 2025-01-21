@@ -1,6 +1,6 @@
 # © Ylann Rouzaire 2025 `rouzaire.ylann@gmail.com`
 
-include("../src/load_everything.jl")
+include("src/load_everything.jl")
 
 #= 
 
@@ -30,7 +30,7 @@ wrapsT = 16
 block3D = (wrapsT, wrapsT, 1)
 grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
-tmax = Tf(1E3)
+tmax = Tf(1E4)
 dt = Tf(1E-1)
 time_spacing = "linear" # choose among "linear", "log", "quadratic"
 if time_spacing == "linear"
@@ -56,18 +56,18 @@ number_of_defects = zeros(R, length(Ts), length(sigmas), length(inits), length(d
 Cs = zeros(round(Int,Lmin/2-1) , R, length(Ts), length(sigmas), length(inits), length(distribution_types), length(times)) # correlation function C(r,t)
 xis = zeros(R, length(Ts), length(sigmas), length(inits), length(distribution_types), length(times)) # correlation length ξ(t)
 
-m = 0
+mm = 0
 M = length(Ts) * length(inits) * length(sigmas) * length(distribution_types)
 
-z = @elapsed for i in each(Ts), j in each(sigmas), k in each(inits), mm in each(distribution_types)
+z = @elapsed for i in each(Ts), j in each(sigmas), k in each(inits), m in each(distribution_types)
 
     T = Tf(Ts[i])
     sigma = Tf(sigmas[j])
     init = inits[k]
-    distribution_type = distribution_types[mm]
-    m += 1
-
-    println("Simulation $m/$M : T = $T, σ = $(sigma), Init = $init, ω ~ $distribution_type")
+    distribution_type = distribution_types[m]
+    
+    global mm += 1
+    println("Simulation $mm/$M : T = $T, σ = $(sigma), Init = $init, ω ~ $distribution_type")
 
     thetas = create_thetas(Lx, Ly, R, init, params_init)
     thetas_new = similar(thetas) # allocates a similar array to thetas 
@@ -77,13 +77,13 @@ z = @elapsed for i in each(Ts), j in each(sigmas), k in each(inits), mm in each(
     for tt in 1:length(times)
         thetas, t = evolve_Kuramoto!(thetas, thetas_new, omegas, Lx, Ly, R, T, t, dt, times[tt], lattice_type)
         
-        thetas_saved_cpu[:, :, :, i, j, k, mm, tt] = Array(thetas)
+        thetas_saved_cpu[:, :, :, i, j, k, m, tt] = Array(thetas)
 
-        magnetisations[:, i, j, k, mm, tt] = Array(OP(thetas)[2])
-        number_of_defects[:, i, j, k, mm, tt] = Array(number_defects(thetas))
+        magnetisations[:, i, j, k, m, tt] = Array(OP(thetas)[2])
+        number_of_defects[:, i, j, k, m, tt] = Array(number_defects(thetas))
         tmp = Array(corr_fft(thetas))
-        Cs[:, :, i, j, k, mm, tt] = tmp
-        xis[:, i, j, k, mm, tt] = correlation_length(tmp)
+        Cs[:, :, i, j, k, m, tt] = tmp
+        xis[:, i, j, k, m, tt] = correlation_length(tmp)
     
     end
 end
@@ -101,11 +101,7 @@ comments = "$(time_spacing)ly spaced times. $(lattice_type) lattice."
 
 pwd()
 filepath = pwd() * "/models/kuramoto/data/"
-filename = "coarsening_Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_sigmas$(sigmas)_inits_"
-for initt in inits filename *= initt * "_" end
-filename *= "distributions_"
-for distrib in distribution_types filename *= distrib * "_" end
-filename *= "tmax$(tmax)"
+filename = "coarsening_Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_sigmas$(sigmas)_inits_$(join(inits, "_"))_distributions_$(join(distribution_types, "_"))_tmax$(tmax)"
 
 @save filepath * filename * ".jld2" Lx Ly R Ts sigmas times tmax dt inits distribution_types comments runtime = z
 @save filepath * filename * "_with_thetas.jld2" thetas_saved_cpu Lx Ly R Ts sigmas tmax times dt inits distribution_types comments runtime = z
