@@ -113,3 +113,4 @@ println("Data saved in $(filepath * filename).jld2")
 # filepath = pwd() * "/models/kuramoto/data/" # same as above
 # filename = "coarsening_Lx256_Ly256_R4_Ts[0.05]_sigmas[0.1]_inits_hightemp_distributions_uniform_gaussian_tmax10000.0"
 # @load filepath * filename * ".jld2" Lx Ly R Ts sigmas times tmax dt inits distribution_types comments runtime # without the "=z"
+# @load filepath * filename * ".jld2" thetas_saved_cpu Lx Ly R Ts sigmas tmax times dt inits distribution_types comments runtime
