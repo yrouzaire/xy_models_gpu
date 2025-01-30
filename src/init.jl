@@ -1,5 +1,6 @@
 # © Ylann Rouzaire 2025 `rouzaire.ylann@gmail.com`
 
+
 function create_thetas(Lx, Ly, R, init::String, params_init)
 
     if init in ["random", "hightemp", "disorder", "disordered"]
@@ -43,22 +44,8 @@ function create_thetas(Lx, Ly, R, init::String, params_init)
     
     return CuArray(thetas)
 end
+initialisation_thetas = create_thetas # alias
 
-# initialisation_thetas = create_thetas # alias
-# thetas = create_thetas(Lx, Ly, R, init, params_init)
-# plot_thetas(circshift(Array(thetas), (0, Int(Ly / 2), 0)))
-# plot_thetas(thetas)
-# ##
-# mod(
-#     atan(-30, 25) + atan(70, 25) + atan(170, 25) + 
-#     -atan(-30, -25) - atan(70, -25) - atan(170, -25) + pi
-# , 2pi)/2pi
-
-# ##
-# mod(atan(10, 2) + atan(-90, 2) + atan(110, 2), 2pi) / 2pi
-# mod(atan(90, 2) + atan(-10, 2) + atan(190, 2), 2pi) / 2pi
-
-##
 function create_omegas(Lx, Ly, R, σ, distribution_type)
     distribution_type = lowercase(distribution_type)
     if distribution_type in ["gaussian", "normal", "norm"]
