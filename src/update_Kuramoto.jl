@@ -79,12 +79,15 @@ end
 
 function evolve_Kuramoto!(thetas, thetas_new, omegas, Lx, Ly, R, T, t, dt, tmax, lattice_type)
     @assert lattice_type in ["square", "triangular"]
+    if lattice_type == "square"
     while t < tmax
         t += dt
+        update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
+    end
 
-        if lattice_type == "square"
-            update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
-        elseif lattice_type == "triangular"
+    elseif lattice_type == "triangular"
+        while t < tmax
+            t += dt
             update_Kuramoto_triangular!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
         end
     end
