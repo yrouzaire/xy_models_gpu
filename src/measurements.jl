@@ -24,9 +24,9 @@ function corr_fft(thetas)
     S = sin.(thetas)
     c_fft_2d = abs.((ifft(abs.(fft(C) .^ 2 + fft(S) .^ 2))))
     c_fft_2d = Array(c_fft_2d)
-    c_fft = zeros(Lmin_over_2 -1, R)
+    c_fft = zeros(Lmin_over_2 - 1, R)
     for r in 1:R
-        c_fft[:,r] = (c_fft_2d[2:Lmin_over_2, 1, r] + c_fft_2d[1, 2:Lmin_over_2, r]) / (2c_fft_2d[1, 1, r])
+        c_fft[:, r] = (c_fft_2d[2:Lmin_over_2, 1, r] + c_fft_2d[1, 2:Lmin_over_2, r]) / (2c_fft_2d[1, 1, r])
     end
     # does the mean of the first row and first column and renormalises by the first element
     return c_fft
@@ -34,10 +34,10 @@ end
 
 function correlation_length(C, threshold=exp(-1))
     L, R = size(C)
-    xi = zeros(R) 
-    for r in 1:R 
-        tmp = findfirst(x->x<threshold, C[:,r])
-        if isnothing(tmp) 
+    xi = zeros(R)
+    for r in 1:R
+        tmp = findfirst(x -> x < threshold, C[:, r])
+        if isnothing(tmp)
             xi[r] = NaN
         else
             xi[r] = tmp
@@ -57,6 +57,8 @@ It returns the signed arclength (in radians) from theta1 to theta2 on the unit t
 
 
 function spot_defects(thetas, lattice_type="square")
+    @assert length(size(thetas)) == 3 "thetas should be a 3D array"
+    thetas = CuArray(thetas)
     Lx, Ly, R = size(thetas)
     there_is_a_plus_defect = CUDA.zeros(Int, Lx, Ly, R) # predeclaration
     there_is_a_minus_defect = CUDA.zeros(Int, Lx, Ly, R) # predeclaration
@@ -81,7 +83,7 @@ function number_defects_plus_minus(thetas, lattice_type="square")
     there_is_a_plus_defect, there_is_a_minus_defect = spot_defects(thetas, lattice_type)
     n_plus = reduce(+, there_is_a_plus_defect, dims=(1, 2))[1, 1, :]
     n_minus = reduce(+, there_is_a_minus_defect, dims=(1, 2))[1, 1, :]
-    n_total = n_plus + n_minus 
+    n_total = n_plus + n_minus
     return n_plus, n_minus, n_total
 end
 
@@ -96,7 +98,7 @@ function kernel_spot_defects_square!(thetas, there_is_a_plus_defect, there_is_a_
     if check_bulk
 
         #= The plaquette is defined as follows (X is the defect)
-     i,j+1 -------i+1,j+1
+        i,j+1 -------i+1,j+1
         |           |
         |     X     |
         |           |
@@ -116,7 +118,7 @@ function kernel_spot_defects_square!(thetas, there_is_a_plus_defect, there_is_a_
         q += arclength(thetas[i, jp, k], thetas[i, j, k])
         q = round(q / 2 / pi, digits=1) # to avoid numerical errors such as 0.99999 ≠ 1
 
-        if q == 1 
+        if q == 1
             there_is_a_plus_defect[i, j, k] = true
         elseif q == -1
             there_is_a_minus_defect[i, j, k] = true
@@ -145,20 +147,20 @@ function kernel_spot_defects_triangular!(thetas, there_is_a_plus_defect, there_i
         jp = mod1(j + 1, Ly)
 
 
-        if iseven(i) 
-        #= The up and down plaquettes are defined as follows (X is the defect)
-           i+1,j+1               
-            /   \       
-           /  X  \                 
-          /       \                 
-        i,j-------i+1,j             
-          \       /
-           \  X  /
-            \   /
-           i-1,j+1
-        =#
+        if iseven(i)
+            #= The up and down plaquettes are defined as follows (X is the defect)
+               i+1,j+1               
+                /   \       
+               /  X  \                 
+              /       \                 
+            i,j-------i+1,j             
+              \       /
+               \  X  /
+                \   /
+               i-1,j+1
+            =#
 
-        # up plaquette
+            # up plaquette
             q = Float32(0)
             q += arclength(thetas[i, j, k], thetas[ip, j, k])
             q += arclength(thetas[ip, j, k], thetas[ip, jp, k])
@@ -177,7 +179,7 @@ function kernel_spot_defects_triangular!(thetas, there_is_a_plus_defect, there_i
             q += arclength(thetas[imm, jp, k], thetas[ip, j, k])
             q += arclength(thetas[ip, j, k], thetas[i, j, k])
             q = round(q / 2 / pi, digits=1) # to avoid numerical errors such as 0.99999 ≠ 1
-            
+
             if q == 1
                 there_is_a_plus_defect[i, j, k] = true
             elseif q == -1
@@ -185,18 +187,18 @@ function kernel_spot_defects_triangular!(thetas, there_is_a_plus_defect, there_i
             end
 
         elseif isodd(i)
-        #= The up and down plaquettes are defined as follows (X is the defect)
-                          
-            i-1,j+1 ----- i,j+1            
-                \       /
-                 \  X  /
-                  \   /
-                   i,j
-                  /   \       
-                 /  X  \                 
-                /       \ 
-            i-1,j-1 ----- i,j-1
-        =#
+            #= The up and down plaquettes are defined as follows (X is the defect)
+
+                i-1,j+1 ----- i,j+1            
+                    \       /
+                     \  X  /
+                      \   /
+                       i,j
+                      /   \       
+                     /  X  \                 
+                    /       \ 
+                i-1,j-1 ----- i,j-1
+            =#
 
 
             # down plaquette (the triangle pointing down, above)
