@@ -18,9 +18,9 @@ wrapsT = 16
 block3D = (wrapsT, wrapsT, 1)
 grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
-tmax = Tf(1E2)
+tmax = Tf(1E4)
 dt = Tf(1E-1)
-duration_movies_in_seconds = 12
+duration_movies_in_seconds = 17
 frame_per_seconds = 30
 nb_frames = frame_per_seconds * duration_movies_in_seconds
 every = tmax / nb_frames
@@ -38,24 +38,26 @@ end
 
 inits = ["lowtemp", "hightemp"]
 params_init = (x_plus=Lx / 4, y_plus=Ly / 2, r0=Lx / 2, mu_plus=0.0) # only useful for the "pair" init (a pair of defects) 
-Ts = [0.05, 0.1]
-alphas = [0, 0.1]
-distribution_types = ["uniform", "gaussian"]
+Ts = [0.03]
+alphas = [0.1]
+sigmas = [0.1]
+distribution_types = ["gaussian"]
 
-thetas_saved_cpu = zeros(Float16, Lx, Ly, R, length(Ts), length(alphas), length(inits), length(distribution_types), length(times))
+thetas_saved_cpu = zeros(Float16, Lx, Ly, R, length(Ts), length(alphas), length(sigmas), length(inits), length(distribution_types), length(times))
 thetas_saved_cpu
 m = 0
-M = length(Ts) * length(inits) * length(alphas) * length(distribution_types)
+M = length(Ts) * length(inits) * length(alphas) * length(distribution_types) * length(sigmas)
 
-z = @elapsed for i in each(Ts), j in each(alphas), k in each(inits), mm in each(distribution_types)
+z = @elapsed for i in each(Ts), j in each(alphas), k in each(sigmas), l in each(inits), mm in each(distribution_types)
 
     T = Tf(Ts[i])
     alpha = Tf(alphas[j])
-    init = inits[k]
+    sigma = Tf(sigmas[k])
+    init = inits[l]
     distribution_type = distribution_types[mm]
     m += 1
 
-    println("Simulation $m/$M : T = $T, σ = $(alpha), Init = $init, ω ~ $distribution_type")
+    println("Simulation $m/$M : T = $T, α = $(alpha), σ = $(sigma), Init = $init, ω ~ $distribution_type")
 
     thetas = create_thetas(Lx, Ly, R, init, params_init)
     thetas_new = similar(thetas)
@@ -64,8 +66,8 @@ z = @elapsed for i in each(Ts), j in each(alphas), k in each(inits), mm in each(
     t = Float64(0)
     for tt in each(times)
         # println("t = $(round(t, digits=2)), $(round(100t/tmax, digits=2)) %")
-        thetas, t = evolve_Kuramoto!(thetas, thetas_new, omegas, Lx, Ly, R, T, t, dt, times[tt], lattice_type)
-        thetas_saved_cpu[:, :, :, i, j, k, mm, tt] = Array(thetas)
+        thetas, t = evolve_NRKuramoto!(thetas, thetas_new, omegas, Lx, Ly, R, T, sigma, t, dt, times[tt], lattice_type)
+        thetas_saved_cpu[:, :, :, i, j, k, l, mm, tt] = Array(thetas)
     end
 end
 prinz(z)
@@ -78,9 +80,9 @@ prinz(z)
 pwd()
 
 comments = "$(time_spacing)ly spaced times. $(lattice_type) lattice. "
-filepath = pwd() * "/models/kuramoto/movies/data_for_movies/"
-filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_alphas$(alphas)_inits_$(join(inits, "_"))_distributions_$(join(distribution_types, "_"))_tmax$(tmax)_.jld2"
-@save filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas tmax times dt inits distribution_types comments runtime = z
+filepath = pwd() * "/models/nrkuramoto/movies/data_for_movies/"
+filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_alphas$(alphas)_sigmas$(sigmas)_inits_$(join(inits, "_"))_distributions_$(join(distribution_types, "_"))_tmax$(tmax)_.jld2"
+@save filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas sigmas tmax dt inits distribution_types comments runtime = z frame_per_seconds nb_frames duration_movies_in_seconds
 
 ## ------------------------ Load data ------------------------ ##
 ## ------------------------ Load data ------------------------ ##
@@ -88,9 +90,9 @@ filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_alphas$(alphas)_inits_$(join(inits, "_
 ## ------------------------ Load data ------------------------ ##
 pwd()
 
-filepath = pwd() * "/models/kuramoto/movies/data_for_movies/"
-filename = ".jld2"
-@load filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas tmax times dt inits distribution_types comments runtime
+filepath = pwd() * "/models/nrkuramoto/movies/data_for_movies/"
+filename = "Lx256_Ly256_R4_Ts[0.03]_alphas[0.1]_sigmas[0.2]_inits_lowtemp_hightemp_distributions_gaussian_tmax10000.0_.jld2"
+@load filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas sigmas tmax times dt inits distribution_types comments runtime frame_per_seconds nb_frames duration_movies_in_seconds
 
 
 ## ------------------------ Make the movie ------------------------ ##
@@ -100,20 +102,21 @@ filename = ".jld2"
 using GLMakie
 GLMakie.activate!()
 
-zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in each(alphas), ind_distrib in each(distribution_types), rr in 1:R
+zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_alf in each(alphas), ind_sig in each(sigmas), ind_distrib in each(distribution_types), rr in 1:R
 
     T = Ts[ind_T]
-    alpha = alphas[ind_sig]
+    alpha = alphas[ind_alf]
+    sigma = sigmas[ind_sig]
     init = inits[ind_init]
     distribution_type = distribution_types[ind_distrib]
 
     fig = Figure()
     ax1 = Axis(fig[1, 1], xlabel=L"x", ylabel=L"y",
         ylabelrotation=0, xtickalign=0, ytickalign=0,
-        title=L"t = 0, σ = %$(alpha), T = %$(T)")
+        title=L"t = 0, α = %$(alpha), σ = %$(sigma), T = %$(T)")
     hidedecorations!(ax1)
 
-    data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, ind_distrib, 1], Float32(2pi)))
+    data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_sig, ind_init, ind_distrib, 1], Float32(2pi)))
     h = CairoMakie.heatmap!(ax1, data_to_plot,
         colormap=cols_thetas,
         colorrange=(0, 2pi))
@@ -131,15 +134,16 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in each(al
     fig
 
 
-    # nframes = 10 # to test on small number of frames if needed
     nframes = length(times)
-    filename = "/$(lowercase(distribution_type))_Lx$(Lx)_Ly$(Ly)_T$(T)_sigma$(alpha)_tmax$(tmax)_r$(rr)"
+    # nframes = 10 # to test on small number of frames if needed
+    
+    filename = "/$(lowercase(distribution_type))_Lx$(Lx)_Ly$(Ly)_T$(T)_alpha$(alpha)_sigma$(sigma)_tmax$(tmax)_r$(rr)"
+    filepath = pwd() * "/models/nrkuramoto/movies/"
 
     GLMakie.record(fig, filepath * "/$(lowercase(init))/" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
         println("Frame $(round(100tt / nframes,digits=2)) %")
-        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_init, ind_distrib, tt], Float32(2pi))
-        ax1.title = L"t = %$(round(times[tt], digits=1)), σ = %$(alpha), T = %$(T)"
+        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_sig, ind_init, ind_distrib, tt], Float32(2pi))
+        ax1.title = L"t = %$(round(times[tt], digits=1)), α = %$(alpha), σ = %$(sigma), T = %$(T)"
     end
-
 end
 prinz(zm)
