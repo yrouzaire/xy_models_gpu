@@ -91,7 +91,7 @@ filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_alphas$(alphas)_sigmas$(sigmas)_inits_
 pwd()
 
 filepath = pwd() * "/models/nrkuramoto/movies/data_for_movies/"
-filename = ".jld2"
+filename = "Lx256_Ly256_R4_Ts[0.03]_alphas[0.1]_sigmas[0.2]_inits_lowtemp_hightemp_distributions_gaussian_tmax10000.0_.jld2"
 @load filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas sigmas tmax times dt inits distribution_types comments runtime frame_per_seconds nb_frames duration_movies_in_seconds
 
 
@@ -116,7 +116,7 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_alf in each(al
         title=L"t = 0, α = %$(alpha), σ = %$(sigma), T = %$(T)")
     hidedecorations!(ax1)
 
-    data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, ind_distrib, 1], Float32(2pi)))
+    data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_sig, ind_init, ind_distrib, 1], Float32(2pi)))
     h = CairoMakie.heatmap!(ax1, data_to_plot,
         colormap=cols_thetas,
         colorrange=(0, 2pi))
@@ -134,13 +134,15 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_alf in each(al
     fig
 
 
-    # nframes = 10 # to test on small number of frames if needed
     nframes = length(times)
+    # nframes = 10 # to test on small number of frames if needed
+    
     filename = "/$(lowercase(distribution_type))_Lx$(Lx)_Ly$(Ly)_T$(T)_alpha$(alpha)_sigma$(sigma)_tmax$(tmax)_r$(rr)"
+    filepath = pwd() * "/models/nrkuramoto/movies/"
 
     GLMakie.record(fig, filepath * "/$(lowercase(init))/" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
         println("Frame $(round(100tt / nframes,digits=2)) %")
-        data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, ind_distrib, tt], Float32(2pi)))
+        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_sig, ind_init, ind_distrib, tt], Float32(2pi))
         ax1.title = L"t = %$(round(times[tt], digits=1)), α = %$(alpha), σ = %$(sigma), T = %$(T)"
     end
 end

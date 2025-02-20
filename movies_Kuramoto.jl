@@ -55,7 +55,7 @@ z = @elapsed for i in each(Ts), j in each(alphas), k in each(inits), mm in each(
     distribution_type = distribution_types[mm]
     m += 1
 
-    println("Simulation $m/$M : T = $T, α = $(alpha), Init = $init, ω ~ $distribution_type")
+    println("Simulation $m/$M : T = $T, σ = $(alpha), Init = $init, ω ~ $distribution_type")
 
     thetas = create_thetas(Lx, Ly, R, init, params_init)
     thetas_new = similar(thetas)

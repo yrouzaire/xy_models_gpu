@@ -131,7 +131,7 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in each(si
 
     GLMakie.record(fig, filepath * "/$(lowercase(init))/" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
         println("Frame $(round(100tt / nframes,digits=2)) %")
-    data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, tt], Float32(2pi)))
+        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, ind_distrib, tt], Float32(2pi))
         ax1.title = L"t = %$(round(times[tt], digits=1)), σ = %$(sigma), T = %$(T)"
     end
 

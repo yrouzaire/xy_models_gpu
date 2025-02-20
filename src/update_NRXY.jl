@@ -94,7 +94,6 @@ end
 function evolve_NRXY!(thetas, thetas_new, Lx, Ly, R, T, sigma, t, dt, tmax, lattice_type)
     lattice_type = lowercase(lattice_type)
     @assert lattice_type in ["square", "triangular"]
-
     if lattice_type == "square"
         while t < tmax
             t += dt

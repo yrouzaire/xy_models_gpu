@@ -5,7 +5,7 @@ for the parameters
     R = 32
     
     lattice_type = "triangular"
-    
+
     dt = 0.1
     tmax = 1000.0
     
