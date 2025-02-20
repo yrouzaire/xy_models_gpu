@@ -30,7 +30,7 @@ wrapsT = 16
 block3D = (wrapsT, wrapsT, 1)
 grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
-tmax = Tf(1E4)
+tmax = Tf(1E2)
 dt = Tf(1E-1)
 time_spacing = "linear" # choose among "linear", "log", "quadratic"
 if time_spacing == "linear"
