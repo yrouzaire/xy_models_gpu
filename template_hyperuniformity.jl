@@ -74,19 +74,19 @@ z = @elapsed for i in each(ratios_TKT), j in each(alphas), k in each(inits), mm 
         # magnetisations[:, i, j, k, mm, tt] = OP(thetas)[1]
         # number_of_defects[:, i, j, k, mm, tt] = number_defects(thetas)
 
-        # dico = spot_defects(thetas, lattice_type) # for a quick visual check if needed
-        # qs[:, i, j, k, mm, tt] = dico["qs"]
-        # xs[:, i, j, k, mm, tt] = dico["xs"]
-        # ys[:, i, j, k, mm, tt] = dico["ys"]
+        dico = spot_defects(thetas, lattice_type) # for a quick visual check if needed
+        qs[:, i, j, k, mm, tt] = dico["qs"]
+        xs[:, i, j, k, mm, tt] = dico["xs"]
+        ys[:, i, j, k, mm, tt] = dico["ys"]
     end
 end
 println("Simulation over.")
 prinz(z) # prints the runtime in seconds, minutes and hours. Defined in `auxiliary.jl` file.
 
 fig = plot_thetas(thetas_saved_cpu[:, :, :, 1, 1, 1, 1, end], defects=false) # for a quick visual check if needed 
-fig
-dico["xs"]
-dico["number_defects"]
+# fig
+# dico["xs"]
+# dico["number_defects"]
 
 # @btime spot_defects(thetas_saved_cpu[:, :, :, 1, 1, 1, 1, end], lattice_type)
 
