@@ -1,8 +1,6 @@
 # © Ylann Rouzaire 2025 `rouzaire.ylann@gmail.com`
 
 # to easily check on the theta field 
-
-
 function plot_thetas(thetas; defects=false, lattice_type="square")
     fig_without_defects, ax_without_defects = plot_thetas_without_defects(thetas)
     if defects == false

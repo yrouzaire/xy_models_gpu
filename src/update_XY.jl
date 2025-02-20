@@ -76,6 +76,7 @@ function update_XY_triangular!(thetas, thetas_new, Lx, Ly, R, T, dt)
 end
 
 function evolve_XY!(thetas, thetas_new, Lx, Ly, R, T, t, dt, tmax, lattice_type)
+    lattice_type = lowercase(lattice_type)
     @assert lattice_type in ["square", "triangular"]
     if lattice_type == "square"
         while t < tmax
@@ -88,5 +89,6 @@ function evolve_XY!(thetas, thetas_new, Lx, Ly, R, T, t, dt, tmax, lattice_type)
             update_XY_triangular!(thetas, thetas_new, Lx, Ly, R, T, dt)
         end
     end
+
     return thetas_new, t
 end

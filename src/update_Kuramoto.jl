@@ -31,6 +31,7 @@ function kernel_update_Kuramoto_square!(thetas, thetas_new, omegas, Lx::Int, Ly:
     return nothing
 end
 
+
 function kernel_update_Kuramoto_triangular!(thetas, thetas_new, omegas, Lx::Int, Ly::Int, R::Int, T::Tf, dt::Tf) where {Tf}
     i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
     j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
@@ -68,6 +69,7 @@ function kernel_update_Kuramoto_triangular!(thetas, thetas_new, omegas, Lx::Int,
     return nothing
 end
 
+
 function update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
     @cuda threads = block3D blocks = grid3D kernel_update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
     @. thetas = thetas_new # quand tous les calculs sur la ligne sont ".able" , vraiment plus rapide que  "thetas .= thetas_new" dixit Ludovic Dumoulin
@@ -78,18 +80,20 @@ function update_Kuramoto_triangular!(thetas, thetas_new, omegas, Lx, Ly, R, T, d
 end
 
 function evolve_Kuramoto!(thetas, thetas_new, omegas, Lx, Ly, R, T, t, dt, tmax, lattice_type)
+    lattice_type = lowercase(lattice_type)
     @assert lattice_type in ["square", "triangular"]
+    
     if lattice_type == "square"
-    while t < tmax
-        t += dt
-        update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
-    end
-
+        while t < tmax
+            t += dt
+            update_Kuramoto_square!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
+        end
     elseif lattice_type == "triangular"
         while t < tmax
             t += dt
             update_Kuramoto_triangular!(thetas, thetas_new, omegas, Lx, Ly, R, T, dt)
         end
     end
+    
     return thetas_new, t
 end

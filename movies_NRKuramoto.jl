@@ -8,7 +8,7 @@ include("src/load_everything.jl")
 ## ------------------ Parameters and data generation ------------------ ##
 ## ------------------ Parameters and data generation ------------------ ##
 
-lattice_type = "triangular"
+lattice_type = "square"
 
 Lx = 256
 Ly = 256
@@ -20,7 +20,7 @@ grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
 tmax = Tf(1E4)
 dt = Tf(1E-1)
-duration_movies_in_seconds = 17
+duration_movies_in_seconds = 12
 frame_per_seconds = 30
 nb_frames = frame_per_seconds * duration_movies_in_seconds
 every = tmax / nb_frames
@@ -40,7 +40,7 @@ inits = ["lowtemp", "hightemp"]
 params_init = (x_plus=Lx / 4, y_plus=Ly / 2, r0=Lx / 2, mu_plus=0.0) # only useful for the "pair" init (a pair of defects) 
 Ts = [0.03]
 alphas = [0.1]
-sigmas = [0.1]
+sigmas = [0.2]
 distribution_types = ["gaussian"]
 
 thetas_saved_cpu = zeros(Float16, Lx, Ly, R, length(Ts), length(alphas), length(sigmas), length(inits), length(distribution_types), length(times))

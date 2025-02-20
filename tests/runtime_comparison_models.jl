@@ -3,12 +3,12 @@ for the parameters
     Lx = 256
     Ly = 256
     R = 32
-
+    
     lattice_type = "triangular"
 
     dt = 0.1
     tmax = 1000.0
-
+    
     --------------- Successive improvements of the models (Square//Triangular) ---------------
                                                (base)    (wrt square)
     runtime XY         = 18.5 // 26 seconds |   100 %  |   140 % 
