@@ -15,6 +15,7 @@ include("auxiliary.jl")
 include("update_XY.jl")
 include("update_NRXY.jl")
 include("update_Kuramoto.jl")
+include("update_NRKuramoto.jl")
 
 include("load_CairoMakie.jl")
 include("visualisation.jl")

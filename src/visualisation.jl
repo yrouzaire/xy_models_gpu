@@ -1,7 +1,6 @@
 # © Ylann Rouzaire 2025 `rouzaire.ylann@gmail.com`
 
 # to easily check on the theta field 
-
 function plot_thetas(thetas; defects=false, lattice_type="square")
     fig_without_defects, ax_without_defects = plot_thetas_without_defects(thetas)
     if defects == false
@@ -32,6 +31,7 @@ function plot_thetas_without_defects(thetas_format_unknown)
         ticks=([0, pi/2, pi, 3pi/2, 2pi], [L"0", L"\pi/2", L"\pi", L"3\pi/2", L"2\pi"]),)
         
     colsize!(fig.layout, 1, Aspect(1, Lx / Ly))
+    colgap!(fig.layout, 1, 6)
     resize_to_layout!(fig)
 
     return fig, ax
