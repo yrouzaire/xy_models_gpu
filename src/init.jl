@@ -19,10 +19,14 @@ function create_thetas(Lx, Ly, R, init::String, params_init)
         for i in 1:Lx, j in 1:Ly
 
             dx_plus = j - y_plus
+            # dx_plus = argmin(abs, [dx_plus, Lx - dx_plus, Lx + dx_plus])
             dy_plus = i - x_plus
+            # dy_plus = argmin(abs, [dy_plus, Ly - dy_plus, Ly + dy_plus])
             
             dx_minus = j - y_minus
+            # dx_minus = argmin(abs, [dx_minus, Lx - dx_minus, Lx + dx_minus])
             dy_minus = i - x_minus
+            # dy_minus = argmin(abs, [dy_minus, Ly - dy_minus, Ly + dy_minus])
 
             thetas[i, j, :] .= mu_plus  + 
                 atan(dy_plus, dx_plus) - atan(dy_minus, dx_minus) +

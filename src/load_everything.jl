@@ -5,7 +5,8 @@ using JLD2
 using CUDA
 using Distributions
 using FFTW # for the Fourier Transform of the spatial correlation function
-
+using SpecialFunctions # for the Bessel functions in the computation of the g(r) (radial distribution function)
+using LinearAlgebra # for diag(matrix)
 Tf = Float32
 
 
