@@ -37,7 +37,7 @@ grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
 
 init = "hightemp"
-params_init = ("dummy") # only useful for the defect pair initialisation. Useless here. 
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2)
 
 lattice_type = "triangular"
 # lattice_type = "square"

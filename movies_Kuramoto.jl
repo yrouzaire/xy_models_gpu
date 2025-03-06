@@ -37,7 +37,7 @@ end
 
 
 inits = ["lowtemp", "hightemp"]
-params_init = (x_plus=Lx / 4, y_plus=Ly / 2, r0=Lx / 2, mu_plus=0.0) # only useful for the "pair" init (a pair of defects) 
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2)
 Ts = [0.05, 0.1]
 alphas = [0, 0.1]
 distribution_types = ["uniform", "gaussian"]

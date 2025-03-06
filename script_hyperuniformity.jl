@@ -33,7 +33,7 @@ else
 end
 
 inits = ["lowtemp"]
-params_init = ("dummy") # only useful for the "pair" init (a pair of defects)
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2)
 
 #= Parameters (α, σ) (intrinsic frequency, non-reciprocity)
 (0,0) is the XY model 

@@ -15,7 +15,7 @@ block3D = (wrapsT, wrapsT, 1)
 grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
 init = "pair"
-params_init = (phi=0.0, r0=Lx / 2, mu_plus=0.0)
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2)
 lattice_type = "square"
 
 dt = Tf(0.1)

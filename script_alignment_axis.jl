@@ -33,7 +33,7 @@ else
 end
 
 init = "hightemp"
-params_init = ("dummy") # only useful for the "pair" init (a pair of defects)
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2)
 
 sigmas = [0, 0.15, 0.3]
 # sigmas = collect(0:0.05:0.30)
