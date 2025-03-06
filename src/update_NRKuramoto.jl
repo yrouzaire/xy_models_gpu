@@ -22,11 +22,15 @@ function kernel_update_NRKuramoto_square!(thetas, thetas_new, omegas, Lx::Int, L
         
         pi_by_2 = Float32(pi / 2)
 
+        #     3
+        # 4   X   2   X is the spin of interest. The x direction is ↓, the y direction is → . 
+        #     1
+
         force =
-            sin(thetas[i, jp, k] - theta) * g_kernel(theta, 0pi_by_2, sigma) +
-            sin(thetas[ip, j, k] - theta) * g_kernel(theta, pi_by_2, sigma) +
-            sin(thetas[i, jm, k] - theta) * g_kernel(theta, -2pi_by_2, sigma) +
-            sin(thetas[i_, j, k] - theta) * g_kernel(theta, -pi_by_2, sigma)
+            sin(thetas[ip, j, k] - theta) * g_kernel(theta, 0pi_by_2, sigma) +
+            sin(thetas[i, jp, k] - theta) * g_kernel(theta, 1pi_by_2, sigma) +
+            sin(thetas[i_, j, k] - theta) * g_kernel(theta, 2pi_by_2, sigma) +
+            sin(thetas[i, jm, k] - theta) * g_kernel(theta, 3pi_by_2, sigma)
 
 
         thetas_new[i, j, k] = theta + (force/4 + omega) * dt + sqrt(2T * dt) * randn(Tf)
@@ -53,23 +57,29 @@ function kernel_update_NRKuramoto_triangular!(thetas, thetas_new, omegas, Lx::In
         pi_by_3 = Float32(pi / 3)
 
         if iseven(i)
+            #     4   3
+            # 5   X   2   X is the spin of interest. The x direction is ↓, the y direction is → . 
+            #     0   1
+
             force =
-                sin(thetas[i, jp, k] - theta) * g_kernel(theta, pi_by_3, sigma) +
-                sin(thetas[i_, jp, k] - theta) * g_kernel(theta, pi_by_3, sigma) +
-                sin(thetas[i_, j, k] - theta) * g_kernel(theta, 2pi_by_3, sigma) +
-                sin(thetas[i, jm, k] - theta) * g_kernel(theta, 3pi_by_3, sigma) +
-                sin(thetas[ip, j, k] - theta) * g_kernel(theta, -2pi_by_3, sigma) +
-                sin(thetas[ip, jp, k] - theta) * g_kernel(theta, -pi_by_3, sigma)
+                sin(thetas[ip, j, k] - theta) * g_kernel(theta, 0pi_by_3, sigma) +
+                sin(thetas[ip, jp, k] - theta) * g_kernel(theta, pi_by_3, sigma) +
+                sin(thetas[i, jp, k] - theta) * g_kernel(theta, 2pi_by_3, sigma) +
+                sin(thetas[i_, jp, k] - theta) * g_kernel(theta, 3pi_by_3, sigma) +
+                sin(thetas[i_, j, k] - theta) * g_kernel(theta, 4pi_by_3, sigma) +
+                sin(thetas[i, jm, k] - theta) * g_kernel(theta, 5pi_by_3, sigma)
 
         elseif isodd(i)
-
+            # 3   2   
+            # 4   X   1   X is the spin of interest. The x direction is ↓, the y direction is → . 
+            # 5   0   
             force =
-                sin(thetas[i, jp, k] - theta) * g_kernel(theta, 0pi_by_3, sigma) +
-                sin(thetas[i_, j, k] - theta) * g_kernel(theta, pi_by_3, sigma) +
-                sin(thetas[i_, jm, k] - theta) * g_kernel(theta, 2pi_by_3, sigma) +
-                sin(thetas[i, jm, k] - theta) * g_kernel(theta, 3pi_by_3, sigma) +
-                sin(thetas[ip, jm, k] - theta) * g_kernel(theta, -2pi_by_3, sigma) +
-                sin(thetas[ip, j, k] - theta) * g_kernel(theta, -pi_by_3, sigma)
+                sin(thetas[ip, j, k] - theta) * g_kernel(theta, 0pi_by_3, sigma) +
+                sin(thetas[i, jp, k] - theta) * g_kernel(theta, pi_by_3, sigma) +
+                sin(thetas[i_, j, k] - theta) * g_kernel(theta, 2pi_by_3, sigma) +
+                sin(thetas[i_, jm, k] - theta) * g_kernel(theta, 3pi_by_3, sigma) +
+                sin(thetas[i, jm, k] - theta) * g_kernel(theta, 4pi_by_3, sigma) +
+                sin(thetas[ip, jm, k] - theta) * g_kernel(theta, 5pi_by_3, sigma)
         end
 
         thetas_new[i, j, k] = theta + (force/6 + omega) * dt + sqrt(2T * dt) * randn(Tf)

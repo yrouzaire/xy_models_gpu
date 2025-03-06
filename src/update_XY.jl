@@ -19,10 +19,16 @@ function kernel_update_XY_square!(thetas, thetas_new, Lx::Int, Ly::Int, R::Int, 
         jm = mod1(j - 1, Ly)
         theta = thetas[i, j, k]
 
-        force = sin(thetas[i, jp, k] - theta) +
-                sin(thetas[ip, j, k] - theta) +
-                sin(thetas[i, jm, k] - theta) +
-                sin(thetas[i_, j, k] - theta)
+        #     3
+        # 4   X   2   X is the spin of interest. The x direction is ↓, the y direction is → . 
+        #     1
+
+        force =
+            sin(thetas[ip, j, k] - theta) +
+            sin(thetas[i, jp, k] - theta) +
+            sin(thetas[i_, j, k] - theta) +
+            sin(thetas[i, jm, k] - theta)
+
 
         thetas_new[i, j, k] = theta + force * dt / 4 + sqrt(2T * dt) * randn(Tf)
     end
@@ -45,20 +51,31 @@ function kernel_update_XY_triangular!(thetas, thetas_new, Lx::Int, Ly::Int, R::I
         theta = thetas[i, j, k]
 
         if iseven(i)
-            force = sin(thetas[i, jp, k] - theta) +
-                    sin(thetas[i_, jp, k] - theta) +
-                    sin(thetas[i_, j, k] - theta) +
-                    sin(thetas[i, jm, k] - theta) +
-                    sin(thetas[ip, j, k] - theta) +
-                    sin(thetas[ip, jp, k] - theta)
+            #     4   3
+            # 5   X   2   X is the spin of interest. The x direction is ↓, the y direction is → . 
+            #     0   1
+
+            force =
+                sin(thetas[ip, j, k] - theta) +
+                sin(thetas[ip, jp, k] - theta) +
+                sin(thetas[i, jp, k] - theta) +
+                sin(thetas[i_, jp, k] - theta) +
+                sin(thetas[i_, j, k] - theta) +
+                sin(thetas[i, jm, k] - theta)
+
         elseif isodd(i)
-            force = sin(thetas[i, jp, k] - theta) +
-                    sin(thetas[i_, j, k] - theta) +
-                    sin(thetas[i_, jm, k] - theta) +
-                    sin(thetas[i, jm, k] - theta) +
-                    sin(thetas[ip, jm, k] - theta) +
-                    sin(thetas[ip, j, k] - theta)
+            # 3   2   
+            # 4   X   1   X is the spin of interest. The x direction is ↓, the y direction is → . 
+            # 5   0   
+            force =
+                sin(thetas[ip, j, k] - theta) +
+                sin(thetas[i, jp, k] - theta) +
+                sin(thetas[i_, j, k] - theta) +
+                sin(thetas[i_, jm, k] - theta) +
+                sin(thetas[i, jm, k] - theta) +
+                sin(thetas[ip, jm, k] - theta)
         end
+
 
         thetas_new[i, j, k] = theta + force * dt / 6 + sqrt(2T * dt) * randn(Tf)
     end
