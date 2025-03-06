@@ -7,17 +7,17 @@ include("src/load_everything.jl")
 ## ------------------ Parameters and data generation ------------------ ##
 ## ------------------ Parameters and data generation ------------------ ##
 
-lattice_type = "triangular"
+lattice_type = "square"
 
-Lx = 256
-Ly = 256
-R = 4 # number of independent realisations
+Lx = 128
+Ly = 128
+R = 8 # number of independent realisations
 
 wrapsT = 16
 block3D = (wrapsT, wrapsT, 1)
 grid3D = (Int(ceil(Lx / wrapsT)), Int(ceil(Ly / wrapsT)), R)
 
-tmax = Tf(1E3)
+tmax = Tf(1E1)
 dt = Tf(1E-1)
 duration_movies_in_seconds = 12
 frame_per_seconds = 30
@@ -35,9 +35,9 @@ else
 end
 
 
-inits = ["lowtemp", "hightemp"]
-Ts = [0.05, 0.1]
-sigmas = [0, 0.1]
+inits = ["hightemp"]
+Ts = [0.02]
+sigmas = 2pi .- [0, 0.1]
 
 thetas_saved_cpu = zeros(Float16, Lx, Ly, R, length(Ts), length(sigmas), length(inits), length(times))
 
@@ -59,7 +59,7 @@ z = @elapsed for i in each(Ts), j in each(sigmas), k in each(inits)
     t = Float64(0)
     for tt in each(times)
         # println("t = $(round(t, digits=2)), $(round(100t/tmax, digits=2)) %")
-        thetas, t = evolve_NRXY!(thetas, thetas_new, Lx, Ly, R, T, sigma, t, dt, times[tt], lattice_type)
+        thetas, t = evolve_NRXY_sharp!(thetas, thetas_new, Lx, Ly, R, T, sigma, t, dt, times[tt], lattice_type)
         thetas_saved_cpu[:, :, :, i, j, k, tt] = Array(thetas)
     end
 end
@@ -74,7 +74,7 @@ pwd()
 
 comments = "$(time_spacing)ly spaced times. $(lattice_type) lattice. "
 filepath = pwd() * "/models/nrxy/movies/data_for_movies/"
-filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_sigmas$(sigmas)_inits_$(join(inits, "_"))_tmax$(tmax)_.jld2"
+filename = "SHARP_Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_sigmas$(sigmas)_inits_$(join(inits, "_"))_tmax$(tmax)_.jld2"
 @save filepath * filename thetas_saved_cpu times Lx Ly R Ts sigmas tmax times dt inits comments runtime = z
 
 ## ------------------------ Load data ------------------------ ##
@@ -84,8 +84,8 @@ filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_sigmas$(sigmas)_inits_$(join(inits, "_
 pwd()
 
 filepath = pwd() * "/models/nrxy/movies/data_for_movies/"
-filename = ".jld2"
-@load filepath * filename thetas_saved_cpu times Lx Ly R Ts sigmas tmax times dt inits comments runtime
+filename = "Lx128_Ly128_R16_Ts[0.02]_sigmas[0.0, 0.01, 0.1]_inits_hightemp_tmax30000.0_.jld2"
+@load filepath * filename thetas_saved_cpu Lx Ly R Ts sigmas tmax times dt inits comments runtime
 
 
 ## ------------------------ Make the movie ------------------------ ##
@@ -95,7 +95,7 @@ filename = ".jld2"
 using GLMakie
 GLMakie.activate!()
 
-zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in each(sigmas), rr in 1:R
+zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in 2:length(sigmas), rr in 1:5
 
     T = Ts[ind_T]
     sigma = sigmas[ind_sig]
@@ -129,9 +129,9 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_sig in each(si
     nframes = length(times)
     filename = "Lx$(Lx)_Ly$(Ly)_T$(T)_sigma$(sigma)_tmax$(tmax)_r$(rr)"
 
-    GLMakie.record(fig, filepath * "/$(lowercase(init))/" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
+    GLMakie.record(fig, filepath * "/../$(lowercase(init))/sharp_" * filename * ".mp4", 1:nframes, framerate=frame_per_seconds) do tt
         println("Frame $(round(100tt / nframes,digits=2)) %")
-        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, ind_distrib, tt], Float32(2pi))
+        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_sig, ind_init, tt], Float32(2pi))
         ax1.title = L"t = %$(round(times[tt], digits=1)), σ = %$(sigma), T = %$(T)"
     end
 
