@@ -45,7 +45,7 @@ else
 end
 
 inits = ["hightemp"] # choose among "lowtemp", "hightemp", "pair"
-params_init = (x_plus=Lx / 4, y_plus=Ly / 2, r0=Lx / 2, mu_plus=0.0) # only useful for the "pair" init (a pair of defects)
+params_init = (r0=Lx / 2, mu_plus=0pi / 2, phi=0pi / 4, q=1, mu0=0pi / 2) # only useful for the "pair" init (a pair of defects)
 Ts = [0.8] * 0.22 # in the XY model, T = 0.22 is the critical temperature of the phase transition to disorder. 
 alphas = [0.] # try first between 0 and 0.2 
 distribution_types = ["gaussian"] # choose among "uniform", "gaussian", "exponential", "cauchy" and "truncated_cauchy"
