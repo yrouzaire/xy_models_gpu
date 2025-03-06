@@ -4,8 +4,9 @@ using CairoMakie, ColorSchemes, LaTeXStrings, MathTeXEngine
 
 cols_thetas = cgrad([:black, :blue, :green, :orange, :red, :black]);
 cols_sigmas = cgrad(ColorSchemes.viridis)
-cols_times = reverse(cgrad(ColorSchemes.Spectral))
-cols_py= cgrad(ColorSchemes.tab10)
+custom_spectral = [ColorSchemes.Spectral[el] for el in [1, 2, 3, 4, 5, 8, 9, 10, 11]]
+cols_times = reverse(cgrad(custom_spectral))
+cols_py = cgrad(ColorSchemes.tab10)
 
 CairoMakie.activate!()
 custom_theme = Theme(
