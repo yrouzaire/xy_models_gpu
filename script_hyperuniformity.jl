@@ -10,8 +10,8 @@ include("src/load_everything.jl")
 lattice_type = "square"
 
 Lx = Ly = 512
-R = 8 # number of independent realisations
-R_simus = 2
+R = 1 # number of independent realisations
+R_simus = 1
 R_tot = R * R_simus
 
 wrapsT = 16
@@ -32,7 +32,7 @@ else
     error("time_spacing should be 'linear', 'log' or 'quadratic'")
 end
 
-inits = ["hightemp"]
+inits = ["lowtemp"]
 params_init = ("dummy") # only useful for the "pair" init (a pair of defects)
 
 #= Parameters (α, σ) (intrinsic frequency, non-reciprocity)
@@ -42,7 +42,7 @@ params_init = ("dummy") # only useful for the "pair" init (a pair of defects)
 (alpha_L2,0.15) is the non-reciprocal Kuramoto model 
 =#
 alpha_L2 = 2 * 2.3 / Lx # in my Frontiers in Physics, I've shown that αξ = 2.3 for t → ∞. If we want ξ ≈ L/2, then one obtains α = 2 * 2.3 / L
-alphas_sigmas = [(0, 0), (0, 0.15), (alpha_L2, 0), (alpha_L2, 0.15)]
+alphas_sigmas = [(0.1, 0)]
 ratios_TKT = [0.2, 0.8]
 distribution_types = ["gaussian"]
 
