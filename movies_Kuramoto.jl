@@ -89,10 +89,10 @@ filename = "Lx$(Lx)_Ly$(Ly)_R$(R)_Ts$(Ts)_alphas$(alphas)_inits_$(join(inits, "_
 pwd()
 
 filepath = pwd() * "/models/kuramoto/movies/data_for_movies/"
-filename = ".jld2"
-@load filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas tmax times dt inits distribution_types comments runtime
+filename = "sergi_lowtemp_longitud_finita_Lx256_Ly256_R1_Ts[0.02]_alphas[0.08]_inits_lowtemp_distributions_gaussian_tmax100000.0_.jld2"
+@load filepath * filename thetas_saved_cpu times Lx Ly R Ts alphas tmax times dt inits distribution_types comments runtime 
 
-
+frame_per_seconds = 30
 ## ------------------------ Make the movie ------------------------ ##
 ## ------------------------ Make the movie ------------------------ ##
 ## ------------------------ Make the movie ------------------------ ##
@@ -131,13 +131,13 @@ zm = @elapsed for ind_T in each(Ts), ind_init in each(inits), ind_alf in each(al
     fig
 
 
-    # nframes = 10 # to test on small number of frames if needed
     nframes = length(times)
+    # nframes = 10 # to test on small number of frames if needed
     filename = "/$(lowercase(distribution_type))_Lx$(Lx)_Ly$(Ly)_T$(T)_alpha$(alpha)_tmax$(tmax)_r$(rr)"
 
-    GLMakie.record(fig, filepath * "/$(lowercase(init))/" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
+    GLMakie.record(fig, pwd()*"/models/kuramoto/movies" * "/$(lowercase(init))" * filename * ".mp4", 1:nframes, fps=frame_per_seconds) do tt
         println("Frame $(round(100tt / nframes,digits=2)) %")
-        data_to_plot = Observable(mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_init, ind_distrib, tt], Float32(2pi)))
+        data_to_plot[] = mod.(thetas_saved_cpu[:, :, rr, ind_T, ind_alf, ind_init, ind_distrib, tt], Float32(2pi))
         ax1.title = L"t = %$(round(times[tt], digits=1)), α = %$(alpha), T = %$(T)"
     end
 end
